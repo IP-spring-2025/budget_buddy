@@ -1,2 +1,6 @@
-# budget_buddy
-Project for internet programming.
+# Budget Buddy
+# Frontend 
+Members: Mary Hanson, Nico Gleason
+
+# Backend
+Members: Nikhil, Stephen Coomes
