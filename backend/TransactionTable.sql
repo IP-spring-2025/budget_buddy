@@ -12,6 +12,7 @@ CREATE Table transactions(
 INSERT INTO transactions (BudgetID, UserID, Amount, TransactionDate, Category)
 VALUES (1, 1, 50.00, '2025-04-01', 'Groceries');
 
+
 INSERT INTO transactions (BudgetID, UserID, Amount, TransactionDate, Category)
 VALUES (2, 2, 100.00, '2025-04-02', 'Rent');
 
@@ -38,3 +39,6 @@ VALUES (4, 4, 400.00, '2025-04-09', 'Travel');
 
 INSERT INTO transactions (BudgetID, UserID, Amount, TransactionDate, Category)
 VALUES (5, 5, 500.00, '2025-04-10', 'Education');
+=======
+ 
+
