@@ -1,3 +1,140 @@
+#!/usr/local/bin/php
+<?php 
+session_start();
+
+$balance = 0;
+
+$living = 0;
+$saving = 0;
+$investing = 0;
+$other = 0;
+
+if(isset($_SESSION['UserID']) && isset($_SESSION['Username'])){
+    $userID = $_SESSION['UserID'];
+    $username = $_SESSION['Username'];
+
+  
+      //creds for db connnection
+      $servername = "mysql.cise.ufl.edu";  
+      $dbUsername = "ngleason";
+      $dbPassword = "Bigtime12";
+      $dbname     = "Budget_Buddy";
+
+      // Create connection
+      $conn = mysqli_connect($servername, $dbUsername, $dbPassword, $dbname);
+      // Check connection
+      if (!$conn) {
+        die("Connection failed: " . mysqli_connect_error());
+      }
+
+      #get total budget
+      $balance = 0;
+      $sql = "SELECT * FROM users WHERE UserID = '".$userID."'";
+      $result = mysqli_query($conn, $sql);
+      if (mysqli_num_rows($result) > 0) {
+        // output data of each row
+        while($row = mysqli_fetch_assoc($result)) {
+          $balance = $row['Balance'];
+        }
+      }
+
+
+      #get transaction values
+      $sql = "SELECT * FROM transactions WHERE UserID = '".$userID."' LIMIT 100";
+      $result = mysqli_query($conn, $sql);
+
+      if (mysqli_num_rows($result) > 0) {
+        // output data of each row
+        while($row = mysqli_fetch_assoc($result)) {
+          if($row['Category'] == 'Living'){
+            $living += $row['Amount'];
+          } else if($row['Category'] == 'Saving'){
+            $saving += $row['Amount'];
+          } else if($row['Category'] == 'Investing'){
+            $investing += $row['Amount'];
+          } else if($row['Category'] == 'Other'){
+            $other += $row['Amount'];
+          }
+        }
+      } 
+
+} else{
+  echo "Session for userid and username not set!";
+}
+
+function BudgetPercent($category){
+  global $living;
+  global $investing;
+  global $other;
+  global $saving;
+
+  $total = $living + $investing + $other + $saving;
+
+  $res = 0;
+
+  if($category == 'Living'){
+    $res = $living / $total;
+  } else if($category == 'Saving'){
+    $res = $saving / $total;
+  } else if($category == 'Investing'){
+    $res = $investing / $total;
+  } else if($category == 'Other'){
+    $res = $other / $total;
+  }
+
+  $res *= 100;
+  
+  return number_format($res,2);
+}
+
+
+function DisplayTransactions($category){
+  if(isset($_SESSION['UserID']) && isset($_SESSION['Username'])){
+    $userID = $_SESSION['UserID'];
+    $username = $_SESSION['Username'];
+
+  
+      //creds for db connnection
+      $servername = "mysql.cise.ufl.edu";  
+      $dbUsername = "ngleason";
+      $dbPassword = "Bigtime12";
+      $dbname     = "Budget_Buddy";
+
+      // Create connection
+      $conn = mysqli_connect($servername, $dbUsername, $dbPassword, $dbname);
+      // Check connection
+      if (!$conn) {
+        die("Connection failed: " . mysqli_connect_error());
+      }
+
+      $sql = "SELECT * FROM transactions WHERE UserID = '".$userID."' LIMIT 100";
+      $result = mysqli_query($conn, $sql);
+
+      if (mysqli_num_rows($result) > 0) {
+        // output data of each row
+        $count = 1;
+        while($row = mysqli_fetch_assoc($result)) {
+          if($row['Category'] == $category){
+            echo '<tr>';
+            echo '<th scope="row">'.$count.'</th>';
+            echo '<td>'.$row['Description'].'</td>';
+            echo '<td>$'.$row['Amount'].'</td>';
+            echo '<td>'.$row['TransactionDate'].'</td>';
+            echo '</tr>';
+          }
+        }
+      } else {
+        echo '<tr>';
+        echo '<td colspan="4"> 0 results </td>';
+        echo '</tr>';
+      }
+      
+
+  } else{
+    echo "Session for userid and username not set!";
+  }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +143,7 @@
     <title>Home</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,25 +151,33 @@
     <style>
         /* Make sure the chart is responsive */
         .chart-container {
-        position: relative;
-        height: 400px;
-        width: 100%;
+          position: relative;
+          height: 400px;
+          width: 100%;
+        }
+        #settings{
+          
         }
     </style>
         
 
 </head>
-<body>
+<body style="width:100vw; height:100vh">
     
     <script src="../navbar.js"></script>
    
     <header class="bg-primary text-white text-center py-5">
+          
         <div class="container">
             <div class="card">
-                <div class="card bg-dark" style="color:white"><h3>Total Budget:</h3></div>
-                <div class="card">$2,000</div>
+                <div class="card bg-dark" style="color:white"><h3>Total Balance:</h3></div>
+                <div class="card">$<?php echo $balance?></div>
+                
             </div>
         </div>
+        <button type="button" class="btn btn-secondary" style="width:200px;margin-top:10px;border:1px solid white;">
+          <i class="bi bi-gear-fill"></i> 
+        </button>
     </header>
     
     <div class="container my-5">
@@ -60,24 +206,7 @@
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  <tr>
-                                    <th scope="row">1</th>
-                                    <td>Groceries</td>
-                                    <td>$30.51</td>
-                                    <td>01/23/25</td>
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">2</th>
-                                    <td>Rent</td>
-                                    <td>$850</td>
-                                    <td>02/01/25</td>
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">3</th>
-                                    <td>Tution</td>
-                                    <td>$1000</td>
-                                    <td>01/01/25</td>
-                                  </tr>
+                                  <?php DisplayTransactions('Living'); ?>
                                 </tbody>
                               </table>
                         </div>
@@ -101,24 +230,7 @@
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  <tr>
-                                    <th scope="row">1</th>
-                                    <td>Groceries</td>
-                                    <td>$30.51</td>
-                                    <td>01/23/25</td>
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">2</th>
-                                    <td>Rent</td>
-                                    <td>$850</td>
-                                    <td>02/01/25</td>
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">3</th>
-                                    <td>Tution</td>
-                                    <td>$1000</td>
-                                    <td>01/01/25</td>
-                                  </tr>
+                                  <?php DisplayTransactions('Investing'); ?>
                                 </tbody>
                               </table>
                             </div>
@@ -142,24 +254,7 @@
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  <tr>
-                                    <th scope="row">1</th>
-                                    <td>Groceries</td>
-                                    <td>$30.51</td>
-                                    <td>01/23/25</td>
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">2</th>
-                                    <td>Rent</td>
-                                    <td>$850</td>
-                                    <td>02/01/25</td>
-                                  </tr>
-                                  <tr>
-                                    <th scope="row">3</th>
-                                    <td>Tution</td>
-                                    <td>$1000</td>
-                                    <td>01/01/25</td>
-                                  </tr>
+                                  <?php DisplayTransactions('Saving'); ?>
                                 </tbody>
                               </table>
                         </div>
@@ -184,24 +279,7 @@
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    <tr>
-                                      <th scope="row">1</th>
-                                      <td>Groceries</td>
-                                      <td>$30.51</td>
-                                      <td>01/23/25</td>
-                                    </tr>
-                                    <tr>
-                                      <th scope="row">2</th>
-                                      <td>Rent</td>
-                                      <td>$850</td>
-                                      <td>02/01/25</td>
-                                    </tr>
-                                    <tr>
-                                      <th scope="row">3</th>
-                                      <td>Tution</td>
-                                      <td>$1000</td>
-                                      <td>01/01/25</td>
-                                    </tr>
+                                    <?php DisplayTransactions('Other'); ?>
                                   </tbody>
                                 </table>
                           </div>
@@ -210,28 +288,28 @@
                       </div>
                   </div>
             </div>
-            <div class="container mt-5">
+            <div class="container" style="margin-top: 10px;">
                 <!-- Card Component -->
-                <div class="card" style="width: 80vw;">
+                <div class="card">
                   <div class="card-header text-center">
                     Item Percentages
                   </div>
                   <div class="card-body" style="display: flex; flex-direction: row; justify-content: space-evenly;">
                     <div>
                       <span class="item-name">Living</span>
-                      <span class="badge bg-danger" >60%</span>
+                      <span class="badge bg-danger" ><?php echo BudgetPercent('Living')?>%</span>
                     </div>
                     <div>
                       <span class="item-name">Saving</span>
-                      <span class="badge bg-primary">20%</span>
+                      <span class="badge bg-primary"><?php echo BudgetPercent('Saving')?>%</span>
                     </div>
                     <div>
                         <span class="item-name">Investing</span>
-                        <span class="badge bg-warning">15%</span>
+                        <span class="badge bg-warning"><?php echo BudgetPercent('Investing')?>%</span>
                       </div>
                     <div>
                       <span class="item-name">Other</span>
-                      <span class="badge bg-success">5%</span>
+                      <span class="badge bg-success"><?php echo BudgetPercent('Other')?>%</span>
                     </div>
                   </div>
                 </div>
@@ -246,17 +324,22 @@
     </div>
 
     <script>
-        // Pie Chart data
+      window.onload = function () {
+        
+        var living = Number(<?php echo $living?>);
+        var saving = Number(<?php echo $saving?>);
+        var investing = Number(<?php echo $investing?>);
+        var other =Number(<?php echo $other?>);
+
         const data = {
-          labels: ['Living', 'Saving', 'Investing', 'Other'], // Labels for each segment
+          labels: ['Living', 'Saving', 'Investing', 'Other'],
           datasets: [{
-            data: [300, 50, 100, 30],  // The values for each segment
-            backgroundColor: ['#FF5733', '#33C3FF', '#FFEB33', '#29AB87'], // Colors for each segment
-            hoverOffset: 4 // Slightly enlarges the segments on hover
+            data: [living, saving, investing, other],
+            backgroundColor: ['#FF5733', '#33C3FF', '#FFEB33', '#29AB87'],
+            hoverOffset: 4
           }]
         };
-    
-        // Configuring the pie chart
+
         const config = {
           type: 'pie',
           data: data,
@@ -264,30 +347,29 @@
             responsive: true,
             plugins: {
               legend: {
-                position: 'top', // Position of the legend
+                position: 'top',
               },
               tooltip: {
                 callbacks: {
                   label: function(tooltipItem) {
-                    return tooltipItem.label + ': ' + tooltipItem.raw; // Tooltip showing the value
+                    return tooltipItem.label + ': ' + tooltipItem.raw;
                   }
                 }
               }
             }
-          },
+          }
         };
-    
-        // Rendering the Pie Chart
+
         const ctx = document.getElementById('myPieChart').getContext('2d');
         new Chart(ctx, config);
+      };
       </script>
     
       <!-- Add Bootstrap JS -->
       <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
     
-        
-
+      
     
     
     <!-- Bootstrap JS -->

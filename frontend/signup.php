@@ -1,6 +1,8 @@
 #!/usr/local/bin/php
 <?php
 // signup.php
+session_start(); // If you want to maintain a session for logged-in users
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 1. Retrieve form data from POST
     $username = $_POST['username'] ?? '';
@@ -40,8 +42,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $stmt->execute();
 
+        //establish session before redirect
+        $_SESSION['UserID']   = $user['UserID'];
+        $_SESSION['Username'] = $user['Username'];
+
         // 6. Redirect or show success message
-        header("Location: index.html");
+        header("Location: home/index.php");
         exit; 
         // Optionally redirect:
         // header("Location: login.html");

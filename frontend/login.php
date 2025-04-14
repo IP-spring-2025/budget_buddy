@@ -2,8 +2,7 @@
 <?php
 // login.php
 session_start(); // If you want to maintain a session for logged-in users
-$_SESSION['UserID']   = $user['UserID'];
-$_SESSION['Username'] = $user['Username'];
+print($PHPSESSID);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
@@ -39,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['Username'] = $user['Username'];
 
             echo "Login successful! Welcome, " . $user['Username'];
-            header("Location: index.html");
+            header("Location: home/index.php");
             exit; 
 
         } else {
