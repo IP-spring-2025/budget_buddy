@@ -390,7 +390,8 @@ function DisplayTransactions($category){
         </div>
 
 
-    </div>
+      </div>
+  </div>
     
 
     
