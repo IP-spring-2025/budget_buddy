@@ -1,20 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login Page</title>
+  <title>Login Page</title>
+  <link rel="stylesheet" href="style1.css">
 </head>
 <body>
-    <h2>Login</h2>
-    <form action="/login" method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <br><br>
-        
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <br><br>
-        
-        <input type="submit" value="Login">
-    </form>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm" action="login.php" method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <br>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <br>
+            
+            <input type="submit" value="Login">
+            <input type="submit" value="Signout">
+        </form>
+    </div>
+  
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      // Regex: username must be alphanumeric (and underscores), at least 3 characters.
+      var usernamePattern = /^[a-zA-Z0-9_]{3,}$/;
+      // Regex: password must be at least 6 characters long.
+      var passwordPattern = /^.{6,}$/;
+      
+      var username = document.getElementById('username').value;
+      var password = document.getElementById('password').value;
+      
+      if (!usernamePattern.test(username)) {
+        e.preventDefault();
+        alert("Invalid username. Use at least 3 characters consisting of letters, numbers, or underscores.");
+        return false;
+      }
+      if (!passwordPattern.test(password)) {
+        e.preventDefault();
+        alert("Invalid password. Password must be at least 6 characters long.");
+        return false;
+      }
+    });
+  </script>
 </body>
 </html>
