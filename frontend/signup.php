@@ -1,6 +1,5 @@
 #!/usr/local/bin/php
 <?php
-// signup.php
 session_start(); // If you want to maintain a session for logged-in users
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

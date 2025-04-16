@@ -29,13 +29,11 @@ if(isset($_SESSION['UserID']) && isset($_SESSION['Username'])){
 
       #get total budget
       $balance = 0;
-      $sql = "SELECT * FROM users WHERE UserID = '".$userID."'";
+      $sql = "SELECT TotalIncome FROM budget WHERE UserID = $userID LIMIT 1";
       $result = mysqli_query($conn, $sql);
       if (mysqli_num_rows($result) > 0) {
-        // output data of each row
-        while($row = mysqli_fetch_assoc($result)) {
-          $balance = $row['Balance'];
-        }
+          $row = mysqli_fetch_assoc($result);
+          $balance = $row['TotalIncome'];
       }
 
 
@@ -57,6 +55,9 @@ if(isset($_SESSION['UserID']) && isset($_SESSION['Username'])){
           }
         }
       } 
+
+      $totalExpenses = $living + $saving + $investing + $other;
+      $remainingBalance = $balance - $totalExpenses;
 
 } else{
   echo "Session for userid and username not set!";
@@ -171,14 +172,79 @@ function DisplayTransactions($category){
         <div class="container">
             <div class="card">
                 <div class="card bg-dark" style="color:white"><h3>Total Balance:</h3></div>
-                <div class="card">$<?php echo $balance?></div>
-                
-            </div>
+                <div class="card">$<?php echo number_format($balance, 2);?></div>
+                <?php
+                  $remainingStyle = $remainingBalance < 0 ? 'color: red;' : 'color: green;';
+                ?>
+              <div class="card bg-dark" style="color:white"><h3>Remaining Balance:</h3></div>
+                <div class="card" style="<?php echo $remainingStyle; ?>">
+                  $<?php echo number_format($remainingBalance, 2); ?>
+                </div>
         </div>
-        <button type="button" class="btn btn-secondary" style="width:200px;margin-top:10px;border:1px solid white;">
+
+        
+        <button type="button" class="btn btn-secondary" style="width:200px;margin-top:10px;border:1px solid white;" data-bs-toggle="modal" data-bs-target="#settingsModal">
           <i class="bi bi-gear-fill"></i> 
         </button>
     </header>
+
+
+    <!-- popup modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="settingsModalLabel">Add New Transaction / Edit Balance</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+
+            <!-- Transaction Form -->
+            <form id="transactionForm">
+              <h6><strong>Add New Transaction</strong></h6>
+              <div class="mb-3">
+                <label for="category" class="form-label">Category</label>
+                <select class="form-select" id="category" required>
+                  <option value="Living">Living</option>
+                  <option value="Saving">Saving</option>
+                  <option value="Investing">Investing</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="amount" class="form-label">Amount</label>
+                <input type="number" class="form-control" id="amount" required>
+              </div>
+              <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <input type="text" class="form-control" id="description" required>
+              </div>
+              <div class="mb-3">
+                <label for="date" class="form-label">Transaction Date</label>
+                <input type="date" class="form-control" id="date" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Add Transaction</button>
+            </form>
+
+            <hr>
+
+            <!-- Balance Form -->
+            <form id="balanceForm" style="margin-top: 20px;">
+              <h6><strong>Edit Total Balance </strong></h6>
+              <div class="mb-3">
+                <label for="totalBalance" class="form-label">New Total Balance</label>
+                <input type="number" step="0.01" class="form-control" id="totalBalance" required value="<?php echo $balance; ?>">
+              </div>
+              <button type="submit" class="btn btn-success">Update Balance</button>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     
     <div class="container my-5">
         <div class="row">
@@ -315,6 +381,54 @@ function DisplayTransactions($category){
                 </div>
               </div>
         </div>
+
+        <!-- goal budget calc-->
+        <div class="container" style="margin-top: 20px;">
+          <div class="card">
+            <div class="card-header text-center">
+              Goal Budget Calculator
+            </div>
+            <div class="card-body">
+              <div class="row text-center mb-3">
+                <div class="col">
+                  <label for="goalLiving">Living %</label>
+                  <input id="goalLiving" class="form-control" type="number" min="0" max="100">
+                </div>
+                <div class="col">
+                  <label for="goalSaving">Saving %</label>
+                  <input id="goalSaving" class="form-control" type="number" min="0" max="100">
+                </div>
+                <div class="col">
+                  <label for="goalInvesting">Investing %</label>
+                  <input id="goalInvesting" class="form-control" type="number" min="0" max="100">
+                </div>
+                <div class="col">
+                  <label for="goalOther">Other %</label>
+                  <input id="goalOther" class="form-control" type="number" min="0" max="100">
+                </div>
+              </div>
+
+              <div class="text-center">
+                <button class="btn btn-primary" onclick="applyGoalBudget()">Apply Calculator</button>
+                <p id="goalError" style="color: red; display: none; margin-top: 10px;">The total must equal 100%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- bar chart -->
+        <div class="container my-4">
+          <div class="card">
+            <div class="card-header text-center">
+              Goal vs Actual Budget Comparison
+            </div>
+            <div class="card-body">
+              <canvas id="goalActualBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+
     </div>
 
     
@@ -384,5 +498,192 @@ function DisplayTransactions($category){
         });
 
     </script>
+
+
+
+      <!--Saves barchart goals-->
+    <script>
+      function applyGoalBudget() {
+        const living = parseFloat(document.getElementById("goalLiving").value) || 0;
+        const saving = parseFloat(document.getElementById("goalSaving").value) || 0;
+        const investing = parseFloat(document.getElementById("goalInvesting").value) || 0;
+        const other = parseFloat(document.getElementById("goalOther").value) || 0;
+
+        const total = living + saving + investing + other;
+
+        if (total !== 100) {
+          document.getElementById("goalError").style.display = "block";
+          return;
+        }
+
+        document.getElementById("goalError").style.display = "none";
+
+        $.post("save_goals.php", {
+          living: living,
+          saving: saving,
+          investing: investing,
+          other: other
+
+        }, function(response) {
+          alert("Goal budget saved");
+          goalActChart.data.datasets[0].data = [living, saving, investing, other];
+          goalActChart.update();
+        }).fail(function() {
+          alert("error saving your goal bud");
+        });
+      }
+    </script>
+
+
+      <!--updates bars and charts live-->
+    <script>
+      //chart labels
+      const labels = ['Living', 'Saving', 'Investing', 'Other'];
+
+      // Actuals from transactions
+      const actualData = [
+        <?php echo BudgetPercent('Living'); ?>,
+        <?php echo BudgetPercent('Saving'); ?>,
+        <?php echo BudgetPercent('Investing'); ?>,
+        <?php echo BudgetPercent('Other'); ?>
+      ];
+
+      // Goals from database
+      <?php
+        $goalQuery = "SELECT LivingGoal, SavingGoal, InvestingGoal, OtherGoal FROM budget WHERE UserID = $userID";
+        $goalResult = mysqli_query($conn, $goalQuery);
+        $goals = [0, 0, 0, 0];
+        if (mysqli_num_rows($goalResult) > 0) {
+          $row = mysqli_fetch_assoc($goalResult);
+          $goals = [
+            $row['LivingGoal'],
+            $row['SavingGoal'],
+            $row['InvestingGoal'],
+            $row['OtherGoal']
+          ];
+        }
+      ?>
+
+      const goalData = [
+        <?php echo implode(',', $goals); ?>
+      ];
+
+      const data = {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Goal %',
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+            data: goalData
+          },
+          {
+            label: 'Actual %',
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+            data: actualData
+          }
+        ]
+      };
+
+      const config = {
+        type: 'bar',
+        data: data,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Goal vs Actual Budget % by Category'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              title: {
+                display: true,
+                text: 'Percentage (%)'
+              }
+            }
+          }
+        }
+      };
+
+      const barChartCtx = document.getElementById('goalActualBarChart').getContext('2d');
+      const goalActChart = new Chart(barChartCtx, config);
+    </script>
+
+    <!-- updates trabsactions -->
+    <script>
+      $('#transactionForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const category = $('#category').val().trim();
+        const amount = parseFloat($('#amount').val());
+        const description = $('#description').val();
+        const date = $('#date').val();
+
+        $.post("insertTrans.php", {
+          category: category,
+          amount: amount,
+          description: description,
+          date: date
+        },
+        
+
+        function(response) {
+          // xloses the modal
+          $('#settingsModal').modal('hide');
+          $('#transactionForm')[0].reset();
+
+          // updates the charts live 
+          $.get("getActuals.php", function(actuals) {
+            goalActChart.data.datasets[1].data = actuals;
+            goalActChart.update();
+
+            pieChart.data.datasets[0].data = actuals;
+            pieChart.update();
+          });
+
+
+          location.reload(); 
+        }).fail(function(xhr) {
+          alert("Failed to insert transaction: " + xhr.responseText);
+        });
+      });
+    </script>
+
+       <!-- updates balance -->
+    <script>
+      $('#balanceForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const newBalance = parseFloat($('#totalBalance').val());
+
+        $.post("insertTrans.php", {
+          totalBalance: newBalance
+        }, function(response) {
+          alert("Balance updated!");
+          $('#settingsModal').modal('hide'); 
+          $('#balanceForm')[0].reset(); 
+          location.reload(); 
+        }).fail(function(xhr) {
+          alert("Failed to update balance: " + xhr.responseText);
+        });
+      });
+    </script>
+
+
+
+
+
+
+   
 </body>
 </html>
