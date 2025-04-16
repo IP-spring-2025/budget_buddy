@@ -8,6 +8,10 @@ $living = 0;
 $saving = 0;
 $investing = 0;
 $other = 0;
+$data = [];
+$x = [];
+$y = [];
+$row_count = 0;
 
 if(isset($_SESSION['UserID']) && isset($_SESSION['Username'])){
     $userID = $_SESSION['UserID'];
@@ -41,9 +45,15 @@ if(isset($_SESSION['UserID']) && isset($_SESSION['Username'])){
       $sql = "SELECT * FROM transactions WHERE UserID = '".$userID."' LIMIT 100";
       $result = mysqli_query($conn, $sql);
 
+      //set total amounts for each budget category & store transactions (all time)
+      $row_count = mysqli_num_rows($result);
       if (mysqli_num_rows($result) > 0) {
         // output data of each row
         while($row = mysqli_fetch_assoc($result)) {
+          $data[] = $row;
+          $x[] = $row['TransactionDate'];
+          $y[] = $row['Amount'];
+
           if($row['Category'] == 'Living'){
             $living += $row['Amount'];
           } else if($row['Category'] == 'Saving'){
@@ -55,6 +65,8 @@ if(isset($_SESSION['UserID']) && isset($_SESSION['Username'])){
           }
         }
       } 
+
+      //set 
 
       $totalExpenses = $living + $saving + $investing + $other;
       $remainingBalance = $balance - $totalExpenses;
@@ -111,6 +123,10 @@ function DisplayTransactions($category){
       $sql = "SELECT * FROM transactions WHERE UserID = '".$userID."' LIMIT 100";
       $result = mysqli_query($conn, $sql);
 
+      echo '<table class="table table-bordered border-primary"> <thead> <tr>';
+      echo '<th scope="col">#</th> <th scope="col">Description</th> <th scope="col">Amount</th> <th scope="col">Date</th> </tr> </thead> <tbody>';
+    
+
       if (mysqli_num_rows($result) > 0) {
         // output data of each row
         $count = 1;
@@ -129,6 +145,8 @@ function DisplayTransactions($category){
         echo '<td colspan="4"> 0 results </td>';
         echo '</tr>';
       }
+
+      echo '</tbody>'.' </table>';
       
 
   } else{
@@ -142,26 +160,11 @@ function DisplayTransactions($category){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
-    <!-- Bootstrap CSS -->
+ 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
-    <style>
-        /* Make sure the chart is responsive */
-        .chart-container {
-          position: relative;
-          height: 400px;
-          width: 100%;
-        }
-        #settings{
-          
-        }
-    </style>
-        
-
 </head>
 <body style="width:100vw; height:100vh">
     
@@ -187,6 +190,13 @@ function DisplayTransactions($category){
           <i class="bi bi-gear-fill"></i> 
         </button>
     </header>
+    <div class="container my-5 w-75 p-3 text-center">
+        <div style="border-radius: 5px; padding: 15px; border: 1px solid rgb(204, 204, 204)">
+            <h2>Expenses Over Time</h2>
+            <canvas id="line-graph"></canvas>
+        </div>
+    </div>
+    <div class="container my-5 w-75 p-3" style="border-radius: 10px; padding: 15px; border: 1px solid rgb(204, 204, 204)">
 
 
     <!-- popup modal -->
@@ -248,11 +258,11 @@ function DisplayTransactions($category){
     
     <div class="container my-5">
         <div class="row">
-            <div class="col-md-6" style="border-radius: 5px; padding: 15px; border: 2px solid rgb(204, 204, 204)">
+            <div class="col-md-6 text-center" style="border-radius: 5px; padding: 15px; margin-top: 10px; border: 1px solid rgb(204, 204, 204)">
                 <h2>Budget Breakdown</h2>
-                <canvas id="myPieChart"></canvas>
+                <canvas id="pie-chart"></canvas>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6" style='margin-top: 10px;'>
                 <div class="accordion" id="accordionExample">
                     <div class="accordion-item">
                       <h2 class="accordion-header">
@@ -262,19 +272,7 @@ function DisplayTransactions($category){
                       </h2>
                       <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
                         <div class="accordion-body">
-                            <table class="table table-bordered border-primary">
-                                <thead>
-                                  <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Description</th>
-                                    <th scope="col">Amount</th>
-                                    <th scope="col">Date</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <?php DisplayTransactions('Living'); ?>
-                                </tbody>
-                              </table>
+                            <?php DisplayTransactions('Living'); ?>  
                         </div>
                       </div>
                     </div>
@@ -286,20 +284,8 @@ function DisplayTransactions($category){
                       </h2>
                       <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
                         <div class="accordion-body">
-                            <table class="table table-bordered border-primary">
-                                <thead>
-                                  <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Description</th>
-                                    <th scope="col">Amount</th>
-                                    <th scope="col">Date</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <?php DisplayTransactions('Investing'); ?>
-                                </tbody>
-                              </table>
-                            </div>
+                          <?php DisplayTransactions('Investing'); ?>  
+                        </div>
                       </div>
                     </div>
                     <div class="accordion-item">
@@ -310,21 +296,8 @@ function DisplayTransactions($category){
                       </h2>
                       <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
                         <div class="accordion-body">
-                            <table class="table table-bordered border-primary">
-                                <thead>
-                                  <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Description</th>
-                                    <th scope="col">Amount</th>
-                                    <th scope="col">Date</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <?php DisplayTransactions('Saving'); ?>
-                                </tbody>
-                              </table>
+                            <?php DisplayTransactions('Saving'); ?> 
                         </div>
-                        
                       </div>
                     </div>
                     <div class="accordion-item">
@@ -335,19 +308,7 @@ function DisplayTransactions($category){
                         </h2>
                         <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
                           <div class="accordion-body">
-                              <table class="table table-bordered border-primary">
-                                  <thead>
-                                    <tr>
-                                      <th scope="col">#</th>
-                                      <th scope="col">Description</th>
-                                      <th scope="col">Amount</th>
-                                      <th scope="col">Date</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    <?php DisplayTransactions('Other'); ?>
-                                  </tbody>
-                                </table>
+                              <?php DisplayTransactions('Other'); ?>
                           </div>
                           
                         </div>
@@ -430,6 +391,7 @@ function DisplayTransactions($category){
 
 
     </div>
+    
 
     
 
@@ -439,7 +401,46 @@ function DisplayTransactions($category){
 
     <script>
       window.onload = function () {
-        
+        //https://www.w3schools.com/ai/ai_chartjs.asp
+        //https://stackoverflow.com/questions/5618925/convert-php-array-to-javascript
+        //https://stackoverflow.com/questions/37204298/how-can-i-hide-dataset-labels-in-chart-js-v2
+
+        //line graph of spending over a year
+        console.log(<?php echo $data[0]['Amount']?>);
+
+        //x = transaction dates
+        var xValues = [<?php echo '"'.implode('","', $x).'"' ?>];
+        //y = amounts
+        var yValues = [];
+
+        //convert amounts to numbers
+        var y = [<?php echo '"'.implode('","', $y).'"' ?>];
+        for (var i = 0; i < y.length; i++){
+          yValues.push(parseFloat(y[i]));
+        }
+
+        //set the line graph up
+        var ctx1 = document.getElementById("line-graph").getContext("2d");
+        new Chart(ctx1, {
+          type: "line",
+          data: {
+            labels: xValues,
+            datasets: [{
+              backgroundColor:"rgba(0,0,255,1.0)",
+              borderColor: "rgba(0,0,255,0.1)",
+              data: yValues
+            }]
+          },
+          options: {
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          } 
+        });
+
+        //PIE CHART - actual expenses budget breakdown
         var living = Number(<?php echo $living?>);
         var saving = Number(<?php echo $saving?>);
         var investing = Number(<?php echo $investing?>);
@@ -474,8 +475,10 @@ function DisplayTransactions($category){
           }
         };
 
-        const ctx = document.getElementById('myPieChart').getContext('2d');
+        const ctx = document.getElementById('pie-chart').getContext('2d');
         new Chart(ctx, config);
+
+        
       };
       </script>
     

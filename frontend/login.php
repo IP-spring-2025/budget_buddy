@@ -2,7 +2,6 @@
 <?php
 // login.php
 session_start(); // If you want to maintain a session for logged-in users
-print($PHPSESSID);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
