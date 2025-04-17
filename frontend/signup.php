@@ -42,8 +42,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
 
         //establish session before redirect
-        $_SESSION['UserID']   = $user['UserID'];
-        $_SESSION['Username'] = $user['Username'];
+        //get userid -> should be last row with max val
+        $conn = mysqli_connect($servername, $dbUsername, $dbPassword, $dbname);
+        $sql = "SELECT MAX(UserID) AS maxID FROM users";
+        $result = mysqli_query($conn, $sql);
+        $result = mysqli_fetch_assoc($result); 
+        $id = $result['maxID'];
+
+        $_SESSION['UserID']   = $id;
+        $_SESSION['Username'] = $username;
 
         // 6. Redirect or show success message
         header("Location: home/index.php");

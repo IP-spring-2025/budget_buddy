@@ -139,6 +139,8 @@ function DisplayTransactions($category){
             echo '<td>'.$row['TransactionDate'].'</td>';
             echo '</tr>';
           }
+          $count += 1;
+            
         }
       } else {
         echo '<tr>';

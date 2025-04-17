@@ -64,4 +64,21 @@
   form input[type="submit"]:hover {
     background-color: #0b5ed7; 
   }
+
+  .signup-prompt {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 0.9em;
+    color: #495057;
+  }
+  
+  .signup-prompt a {
+    color: #0d6efd;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .signup-prompt a:hover {
+    text-decoration: underline;
+  }
   
