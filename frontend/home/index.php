@@ -33,11 +33,11 @@ if(isset($_SESSION['UserID']) && isset($_SESSION['Username'])){
 
       #get total budget
       $balance = 0;
-      $sql = "SELECT TotalIncome FROM budget WHERE UserID = $userID LIMIT 1";
+      $sql = "SELECT Balance FROM users WHERE UserID = $userID LIMIT 1";
       $result = mysqli_query($conn, $sql);
       if (mysqli_num_rows($result) > 0) {
           $row = mysqli_fetch_assoc($result);
-          $balance = $row['TotalIncome'];
+          $balance = $row['Balance'];
       }
 
 
@@ -390,8 +390,8 @@ function DisplayTransactions($category){
         </div>
 
 
-      </div>
-  </div>
+    </div>
+</div>
     
 
     
