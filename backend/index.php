@@ -84,6 +84,51 @@ try {
     }
     echo "</table>";
 
+
+    echo "<h2>Transaction Table</h2>";
+    echo "<table border='1'>
+    <tr>
+        <th>Transaction ID</th>
+        <th>User ID</th>
+        <th>Budget ID</th>
+        <th>Amount</th>
+        <th>Date</th>
+        <th>Category</th>
+    </tr>";
+    while ($row = $stmtTransaction->fetch(PDO::FETCH_ASSOC)) {
+    echo "<tr>
+        <td>{$row['TransactionID']}</td>
+        <td>{$row['UserID']}</td>
+        <td>{$row['BudgetID']}</td>
+        <td>\${$row['Amount']}</td>
+        <td>{$row['TransactionDate']}</td>
+        <td>{$row['Category']}</td>
+      </tr>";
+    }
+    echo "</table>";
+    echo "<h2>Transaction Table</h2>";
+    echo "<table border='1'>
+            <tr>
+                <th>TransactionID</th> 
+                <th>UserID</th>
+                <th>BudgetID</th>
+                <th>Amount</th>
+                <th>TransactionDate</th>
+                <th>Category</th>
+            </tr>";
+
+    while ($row = $stmg->fetch(PDO::FETCH_ASSOC)) {
+        echo "<tr>
+                <td>{$row['TransactionID']}</td>
+                <td>{$row['UserID']}</td>
+                <td>{$row['BudgetID']}</td>
+                <td>\${$row['Amount']}</td>
+                <td>{$row['TransactionDate']}</td>
+                <td>{$row['Category']}</td>
+              </tr>";
+    }
+    echo "</table>";
+
 } catch(PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
 }

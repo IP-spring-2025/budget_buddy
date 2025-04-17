@@ -6,7 +6,8 @@ CREATE TABLE users (
 );
 
 CREATE TABLE budget (
-    UserID INT PRIMARY KEY,
+    BudgetID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT NOT NULL,
     TotalIncome DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     TotalExpense DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     BudgetType ENUM('monthly', 'yearly', 'biweekly') NOT NULL,

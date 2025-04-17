@@ -14,8 +14,8 @@ const header= `
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mr-auto">
-                    <li class="nav-item"><a class="nav-link" href="${userPath}/budget_buddy/frontend/home/index.html">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="${userPath}/budget_buddy/frontend/profile/index.html">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="${userPath}/budget_buddy/frontend/home/index.php">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="${userPath}/budget_buddy/frontend/login.html">Signout</a></li>
                 </ul>
             </div>
         </div>
