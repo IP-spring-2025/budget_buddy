@@ -4,8 +4,8 @@ Budget Buddy is Group 14's submission for CIS4930 Internet Programming at UF. Th
 
 ## Budget Buddy Guide
 
-Site (**Go here first**): https://cise.ufl.edu/~brownd3/cis4930/random/budget_buddy/frontend/login.html\
-Home Page: https://cise.ufl.edu/~brownd3/cis4930/random/budget_buddy/frontend/home/index.php\
+Site (**Go here first**): https://cise.ufl.edu/~brownd3/cis4930/random/budget_buddy/frontend/login.html \
+Home Page: https://cise.ufl.edu/~brownd3/cis4930/random/budget_buddy/frontend/home/index.php \
 Infomation Page: https://cise.ufl.edu/~brownd3/cis4930/random/budget_buddy/frontend/index.html
 
 ER Diagram: assets\ERDiagramFinal.jpg\
