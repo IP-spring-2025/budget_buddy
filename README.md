@@ -4,7 +4,9 @@ Budget Buddy is Group 14's submission for CIS4930 Internet Programming at UF. Th
 
 ## Budget Buddy Guide
 
-Site: cise.ufl.edu/~brownd3/cis4930/random/budget_buddy/frontend/index.html
+Site: cise.ufl.edu/~brownd3/cis4930/random/budget_buddy/frontend/index.html\
+ER Diagram: assets\ERDiagramFinal.jpg\
+(Also located at bottom of ReadMe)
 
 ### Login and Signup
 
@@ -23,16 +25,16 @@ Site: cise.ufl.edu/~brownd3/cis4930/random/budget_buddy/frontend/index.html
    d. Goal budget calculator\
    e. Goal budget comparison
 
-### Goal Budget Calculator
-
-1. At the bottom of the page their users can input their goal budget for each category, (ensuring it adds up to 100).
-2. Below the budget calculator, users can compare their goals with their actual spending by comparison.
-
 ### Inputting Budget and Transactions
 
 1. Clicking the gear icon in the center page opens up an input box where users can add transactions or change their balance.
 2. Updating their balance will allow users to track their balance individually and compare it with their transactions
 3. Transactions are graphed over time on the center of the page, a more detailed breakdown is next to the pi chart in the Budget Breakdown section.
+
+### Goal Budget Calculator
+
+1. At the bottom of the page users can input their goal budget for each category, (ensuring it adds up to 100).
+2. Below the budget calculator, users can compare their goals with their actual spending by comparison.
 
 ## Fullstack
 
@@ -45,3 +47,5 @@ Members: Mary Hanson, Nico Gleason
 ## Backend
 
 Members: Nikhil Anantha, Stephen Coomes
+
+<img src="assets\ERDiagramFinal.jpg" width="400">
